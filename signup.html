@@ -6,34 +6,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="signup.css">
 </head>
-
 <body>
-
 <div class="signup-card">
   <h2>Create Account</h2>
   <p>Register to use Deepfake Detection</p>
-
-  <input type="text" placeholder="Full Name" required>
-  <input type="email" placeholder="Email" required>
-  <input type="password" placeholder="Password" required>
-  <input type="password" placeholder="Confirm Password" required>
-
+  <input type="text" id="fullName" placeholder="Full Name">
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <input type="password" id="confirmPassword" placeholder="Confirm Password">
+  <p id="errorMsg" class="error-msg"></p>
   <button onclick="signup()">Sign Up</button>
-
-  <p class="switch">
-    Already have an account? <a href="login.html">Login</a>
-  </p>
-
+  <p class="switch">Already have an account? <a href="login.html">Login</a></p>
   <a href="index.html">← Back to Home</a>
 </div>
-
 <script>
-function signup(){
-  // For demo: simply alert and redirect to login
-  alert("Account created successfully!\nRedirecting to Login page...");
-  window.location.href = "login.html";
+function signup() {
+  const fullName = document.getElementById("fullName").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.textContent = ""; errorMsg.style.color = "red";
+  if (!fullName) { errorMsg.textContent = "❌ Please enter your full name!"; return; }
+  if (!email || !email.includes("@")) { errorMsg.textContent = "❌ Please enter a valid email!"; return; }
+  if (password.length < 6) { errorMsg.textContent = "❌ Password must be at least 6 characters!"; return; }
+  if (password !== confirmPassword) { errorMsg.textContent = "❌ Passwords do not match!"; return; }
+  const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
+  if (existingUsers.find(u => u.email === email)) { errorMsg.textContent = "❌ Email already registered!"; return; }
+  existingUsers.push({ fullName, email, password });
+  localStorage.setItem("users", JSON.stringify(existingUsers));
+  errorMsg.style.color = "green";
+  errorMsg.textContent = "✅ Account created! Redirecting to login...";
+  setTimeout(() => { window.location.href = "login.html"; }, 1500);
 }
 </script>
-
 </body>
 </html>

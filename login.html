@@ -2,37 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Login</title>
+<title>Login | Deepfake Detector</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="login.css">
 </head>
-
 <body>
-
 <div class="auth-card">
   <h2>Login</h2>
-  <p>Existing user login</p>
-
-  <input type="email" placeholder="Email">
-  <input type="password" placeholder="Password">
-
-  <button onclick="goUpload()">Login</button>
-
-<p class="switch">
-  New user? <a href="signup.html">Create an account</a>
-</p>
-
-<a href="index.html">← Back to Home</a>
-
+  <p>Welcome back! Please login</p>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <p id="errorMsg" class="error-msg"></p>
+  <button onclick="login()">Login</button>
+  <p class="switch">New user? <a href="signup.html">Create an account</a></p>
+  <a href="index.html">← Back to Home</a>
+</div>
 <script>
-function goUpload(){
-  // After login, redirect to upload page
-  window.location.href = "upload.html";
+function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const errorMsg = document.getElementById("errorMsg");
+  errorMsg.textContent = ""; errorMsg.style.color = "red";
+  if (!email || !email.includes("@")) { errorMsg.textContent = "❌ Please enter a valid email!"; return; }
+  if (!password) { errorMsg.textContent = "❌ Please enter your password!"; return; }
+  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) { errorMsg.textContent = "❌ Invalid email or password!"; return; }
+  sessionStorage.setItem("loggedInUser", JSON.stringify({ fullName: user.fullName, email: user.email }));
+  errorMsg.style.color = "green";
+  errorMsg.textContent = `✅ Welcome, ${user.fullName}! Redirecting...`;
+  setTimeout(() => { window.location.href = "upload.html"; }, 1500);
 }
 </script>
-</div>
-
 </body>
 </html>
-
-

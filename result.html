@@ -4,31 +4,56 @@
 <meta charset="UTF-8">
 <title>Result | Deepfake Detector</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<!-- Chart.js MUST -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <link rel="stylesheet" href="result.css">
+<style>
+  .doc-details{background:#f9f9f9;border-radius:12px;padding:16px;margin:16px 0;text-align:left;}
+  .doc-details h4{color:#ff7a00;margin-bottom:10px;font-size:15px;}
+  .doc-detail-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #eee;}
+  .doc-detail-row:last-child{border-bottom:none;}
+  .doc-detail-label{color:#888;}
+  .doc-detail-value{color:#333;font-weight:600;}
+  .issues-list{list-style:none;padding:0;margin:8px 0 0;}
+  .issues-list li{font-size:13px;color:#e53e3e;padding:3px 0;}
+</style>
 </head>
-
 <body>
-
 <div class="result-container">
   <h2>Detection Result</h2>
-  <p>Frame-wise AI probability</p>
-
-  <!-- THIS ID MUST MATCH JS -->
-  <canvas id="aiGraph"></canvas>
-
-  <h3>Overall AI Content: <span id="aiPercent">--</span>%</h3>
-
-  <a href="upload.html" class="btn">Scan Another File</a>
-   <a href="index.html" class="btn outline">Back to Home</a>
+  <p id="subTitle">AI-powered analysis complete</p>
+  <div class="verdict-badge" id="verdictBadge">
+    <span id="verdictIcon">🔍</span>
+    <span id="verdictText">Analyzing...</span>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-value" id="stat1Value">--</div><div class="stat-label" id="stat1Label">Fake Probability</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat2Value">--</div><div class="stat-label" id="stat2Label">Real Probability</div></div>
+    <div class="stat-box"><div class="stat-value" id="stat3Value">--</div><div class="stat-label" id="stat3Label">Confidence</div></div>
+  </div>
+  <div class="file-info" id="fileInfo"></div>
+  <div id="docSection" style="display:none;">
+    <div class="doc-details">
+      <h4>🤖 AI Text Analysis</h4>
+      <div class="doc-detail-row"><span class="doc-detail-label">AI Score</span><span class="doc-detail-value" id="aiScore">--</span></div>
+      <div class="doc-detail-row"><span class="doc-detail-label">Word Count</span><span class="doc-detail-value" id="wordCount">--</span></div>
+      <div class="doc-detail-row"><span class="doc-detail-label">AI Verdict</span><span class="doc-detail-value" id="aiVerdict">--</span></div>
+      <div class="doc-detail-row"><span class="doc-detail-label">Patterns Found</span><span class="doc-detail-value" id="patternsFound">--</span></div>
+    </div>
+    <div class="doc-details">
+      <h4>🔍 Tamper Analysis</h4>
+      <div class="doc-detail-row"><span class="doc-detail-label">Tamper Score</span><span class="doc-detail-value" id="tamperScore">--</span></div>
+      <div class="doc-detail-row"><span class="doc-detail-label">Author</span><span class="doc-detail-value" id="docAuthor">--</span></div>
+      <div class="doc-detail-row"><span class="doc-detail-label">Created</span><span class="doc-detail-value" id="docCreated">--</span></div>
+      <div style="margin-top:8px;"><span class="doc-detail-label" style="font-size:13px;">Issues:</span><ul class="issues-list" id="issuesList"></ul></div>
+    </div>
+  </div>
+  <div class="chart-wrapper"><canvas id="aiGraph"></canvas></div>
+  <p id="framesInfo" style="font-size:13px;color:#888;margin-top:8px;"></p>
+  <div class="btn-group">
+    <a href="upload.html" class="btn">🔄 Scan Another</a>
+    <a href="index.html" class="btn outline">🏠 Home</a>
+  </div>
 </div>
-
-<!-- JS MUST BE AFTER HTML -->
 <script src="result.js"></script>
-
 </body>
 </html>
-

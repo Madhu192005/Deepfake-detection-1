@@ -2,100 +2,126 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Upload Media | Deepfake Detector</title>
+<title>Upload | Deepfake Detector</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="upload.css">
+<style>
+  .mode-tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center;}
+  .tab-btn{padding:10px 20px;border-radius:8px;border:2px solid #ff7a00;background:white;color:#ff7a00;font-weight:600;cursor:pointer;font-size:14px;transition:0.3s;}
+  .tab-btn.active{background:#ff7a00;color:white;}
+  .tab-btn:hover{opacity:0.85;}
+</style>
 </head>
-
 <body>
-
 <div class="upload-container">
-
-  <h2>Upload your media</h2>
-  <p>Select an image or video to detect AI manipulation</p>
-
-  <!-- Upload Box -->
+  <h2>Upload Media or Document</h2>
+  <p>Detect AI manipulation in images, videos, or documents</p>
+  <div class="mode-tabs">
+    <button class="tab-btn active" id="mediaTab" onclick="switchMode('media')">🖼️ Image / Video</button>
+    <button class="tab-btn" id="docTab" onclick="switchMode('document')">📄 Document</button>
+  </div>
   <div class="upload-box" id="upload-box">
     <input type="file" id="fileInput" accept="image/*,video/*">
-    <p>Drag & Drop or Click to Upload</p>
+    <div class="upload-icon">📁</div>
+    <p id="uploadHint">Drag & Drop or Click to Upload</p>
+    <small id="uploadFormats">Supports: JPG, PNG, MP4, AVI, MOV</small>
     <div id="preview"></div>
   </div>
-
+  <p id="fileName" style="margin-bottom:10px;color:#ff7a00;font-size:14px;"></p>
   <button class="scan-btn" id="scanBtn">Start Scan</button>
-
-  <!-- Loader -->
   <div class="loader" id="loader">
     <div class="dot dot1"></div>
     <div class="dot dot2"></div>
     <div class="dot dot3"></div>
+    <p style="margin-left:10px;color:#ff7a00;">Analyzing...</p>
   </div>
-
+  <p id="errorMsg" style="color:red;margin-top:10px;display:none;"></p>
 </div>
-
-
 <script>
-// Elements
+const API_URL = "http://localhost:8000";
+let currentMode = "media";
 const fileInput = document.getElementById('fileInput');
 const preview = document.getElementById('preview');
 const loader = document.getElementById('loader');
 const scanBtn = document.getElementById('scanBtn');
-
-// Hide loader initially
+const fileName = document.getElementById('fileName');
+const errorMsg = document.getElementById('errorMsg');
+const uploadBox = document.getElementById('upload-box');
 loader.style.display = "none";
 
-// Trigger input click when upload box clicked
-const uploadBox = document.getElementById('upload-box');
-uploadBox.addEventListener('click', function(){
-    fileInput.click();
+function switchMode(mode) {
+  currentMode = mode;
+  preview.innerHTML = ""; fileName.textContent = ""; fileInput.value = ""; errorMsg.style.display = "none";
+  document.getElementById('mediaTab').classList.toggle('active', mode === 'media');
+  document.getElementById('docTab').classList.toggle('active', mode === 'document');
+  if (mode === 'media') {
+    fileInput.accept = "image/*,video/*";
+    document.getElementById('uploadFormats').textContent = "Supports: JPG, PNG, MP4, AVI, MOV";
+  } else {
+    fileInput.accept = ".pdf,.docx,image/*";
+    document.getElementById('uploadFormats').textContent = "Supports: PDF, DOCX, JPG, PNG";
+  }
+}
+
+uploadBox.addEventListener('click', function(e) {
+  if (e.target.tagName !== 'IMG' && e.target.tagName !== 'VIDEO') fileInput.click();
 });
 
-// Preview selected file
-fileInput.addEventListener('change', function(){
-    preview.innerHTML = "";
-    const file = this.files[0];
-    if(!file) return;
-
-    if(file.type.startsWith("image/")){
-        const img = document.createElement("img");
-        img.src = URL.createObjectURL(file);
-        img.style.width = "200px";
-        img.style.borderRadius = "10px";
-        preview.appendChild(img);
-    } else if(file.type.startsWith("video/")){
-        const vid = document.createElement("video");
-        vid.src = URL.createObjectURL(file);
-        vid.controls = true;
-        vid.width = 250;
-        vid.style.borderRadius = "10px";
-        preview.appendChild(vid);
-    }
+fileInput.addEventListener('change', function() {
+  preview.innerHTML = ""; errorMsg.style.display = "none";
+  const file = this.files[0];
+  if (!file) return;
+  fileName.textContent = "📄 " + file.name;
+  if (file.type.startsWith("image/")) {
+    const img = document.createElement("img");
+    img.src = URL.createObjectURL(file);
+    img.style.cssText = "width:200px;border-radius:10px;margin-top:10px;";
+    preview.appendChild(img);
+  } else if (file.type.startsWith("video/")) {
+    const vid = document.createElement("video");
+    vid.src = URL.createObjectURL(file); vid.controls = true; vid.width = 250;
+    vid.style.cssText = "border-radius:10px;margin-top:10px;";
+    preview.appendChild(vid);
+  } else {
+    const icon = document.createElement("p");
+    icon.style.cssText = "font-size:40px;margin-top:10px;";
+    icon.textContent = file.name.endsWith('.pdf') ? "📕 PDF Ready" : "📘 DOCX Ready";
+    preview.appendChild(icon);
+  }
 });
 
-// Start Scan → show loader + redirect to result
-scanBtn.addEventListener('click', function(){
-    if(fileInput.files.length === 0){
-        alert("Please choose a file first!");
-        return false;
-    }
-    sessionStorage.setItem("aiResult", "87");
+uploadBox.addEventListener('dragover', e => { e.preventDefault(); uploadBox.style.background = "#fff3e0"; });
+uploadBox.addEventListener('dragleave', () => { uploadBox.style.background = ""; });
+uploadBox.addEventListener('drop', function(e) {
+  e.preventDefault(); uploadBox.style.background = "";
+  if (e.dataTransfer.files[0]) { fileInput.files = e.dataTransfer.files; fileInput.dispatchEvent(new Event('change')); }
+});
+
+scanBtn.addEventListener('click', async function() {
+  if (fileInput.files.length === 0) { alert("Please choose a file first!"); return; }
+  const file = fileInput.files[0];
+  loader.style.display = "flex"; scanBtn.disabled = true; errorMsg.style.display = "none";
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    let endpoint = "";
+    if (currentMode === 'document') endpoint = `${API_URL}/detect/document`;
+    else if (file.type.startsWith("image/")) endpoint = `${API_URL}/detect/image`;
+    else if (file.type.startsWith("video/")) endpoint = `${API_URL}/detect/video`;
+    else throw new Error("Unsupported file type!");
+    const response = await fetch(endpoint, { method: "POST", body: formData });
+    if (!response.ok) { const err = await response.json(); throw new Error(err.detail || "Server error!"); }
+    const result = await response.json();
+    sessionStorage.setItem("deepfakeResult", JSON.stringify(result));
     window.location.href = "result.html";
-
-    loader.style.display = "flex";
-    scanBtn.disabled = true;
-
-    // Simulate scan
-    setTimeout(() => {
-        loader.style.display = "none";
-        scanBtn.disabled = false;
-
-        // Redirect to result page
-        window.location.href = "result.html";
-    }, 3000);
+  } catch (error) {
+    loader.style.display = "none"; scanBtn.disabled = false;
+    errorMsg.textContent = error.message.includes("Failed to fetch")
+      ? "❌ Cannot connect to server! Make sure backend is running on http://localhost:8000"
+      : "❌ Error: " + error.message;
+    errorMsg.style.display = "block";
+  }
 });
-
-
 </script>
-
 </body>
 </html>
-

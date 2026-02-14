@@ -30,6 +30,7 @@ body{
 .auth-card p{
   font-size:14px;
   margin-bottom:20px;
+  color:#666;
 }
 
 input{
@@ -38,6 +39,14 @@ input{
   margin-bottom:14px;
   border:1px solid #ddd;
   border-radius:6px;
+  font-size:14px;
+  outline:none;
+  transition:0.3s;
+}
+
+input:focus{
+  border-color:#ff7a00;
+  box-shadow:0 0 0 2px rgba(255,122,0,0.15);
 }
 
 button{
@@ -49,19 +58,41 @@ button{
   border-radius:6px;
   font-size:16px;
   cursor:pointer;
+  transition:0.3s;
+  margin-top:4px;
 }
 
-.auth-links{
+button:hover{
+  opacity:0.9;
+}
+
+.error-msg{
+  font-size:13px;
+  margin-bottom:10px;
+  min-height:18px;
+  color:red;
+}
+
+.switch{
   margin-top:15px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.auth-links a{
-  text-decoration:none;
-  color:#555;
   font-size:14px;
+  color:#555;
 }
 
+.switch a{
+  color:#ff7a00;
+  text-decoration:none;
+  font-weight:600;
+}
 
+a{
+  display:block;
+  margin-top:12px;
+  text-decoration:none;
+  color:#888;
+  font-size:13px;
+}
+
+a:hover{
+  color:#ff7a00;
+}
